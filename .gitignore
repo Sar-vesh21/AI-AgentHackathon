@@ -1,0 +1,11 @@
+mail/node_modules
+mail/.next
+mail/.env
+mail/.env.local
+mail/.env.development.local
+mail/.env.test.local
+mail/.env.production.local
+
+.env
+
+proton/venv
