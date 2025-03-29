@@ -9,3 +9,6 @@ mail/.env.production.local
 .env
 
 proton/venv
+
+myenv/
+venv/

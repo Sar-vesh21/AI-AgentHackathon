@@ -18,6 +18,7 @@
 # except Exception as e:
 #     print(f"Error occurred: {str(e)}")
 
+from base64 import b64decode
 from typing import Optional
 import requests
 from requests import Session
