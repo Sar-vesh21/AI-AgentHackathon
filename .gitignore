@@ -12,3 +12,5 @@ proton/venv
 
 myenv/
 venv/
+
+*.db

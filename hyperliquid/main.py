@@ -1,27 +1,51 @@
 from llm_agent import LLMAgent
-from hyperliquid_data_service import HyperliquidDataService
-from hyperliquid_analytics import HyperliquidAnalytics
+from data.HyperliquidAnalytics import HyperliquidAnalytics
+from data.HyperliquidDataService import HyperliquidDataService
+from db.database import TraderDatabase
+import time
+from datetime import datetime, timedelta
 
-# Initialize components
-llm = LLMAgent()
+def main():
+    # Initialize components
+    llm = LLMAgent()
+    analytics = HyperliquidAnalytics()
+    data_service = HyperliquidDataService()
+    db = TraderDatabase()
 
-## Lets test the LLM agent with a simple prompt
-# prompt = "What is the capital of the moon?"
-# response = llm.generate_response(prompt)
-# print(response)
+    try:
+        # Fetch and store trader data
+        print(f"Fetching trader data at {datetime.now()}")
+        top_traders = data_service.get_top_traders(limit=10000)
+        db.store_traders(top_traders)
+        print(f"Stored {len(top_traders)} traders in database")
 
-## Lets test the HyperliquidAnalytics class
-analytics = HyperliquidAnalytics(llm)
+        # Analyze each trader and store results
+        print("\nAnalyzing traders...")
+        for i, trader in enumerate(top_traders):
+            try:
+                print(f"\nAnalyzing trader {i+1}/{len(top_traders)}: {trader['address']}")
+                analysis = analytics.analyze_trader(trader['address'])
+                print(analysis)
+                if not analysis['metrics'] :
+                    print(f"No metrics for {trader['address']}")
+                    continue
+                db.store_trader_analysis(trader['address'], analysis)
+                print(f"Stored analysis for {trader['address']}")
+                
+            except Exception as e:
+                print(f"Error analyzing trader {trader['address']}: {e}")
+                continue
 
-dataService = HyperliquidDataService()
+        print("\nAnalysis complete. Waiting 5 minutes before next update...")
+        time.sleep(300)
 
-## Lets test the HyperliquidDataService class
-# trades = dataService.get_user_trades("0x7fdafde5cfb5465924316eced2d3715494c517d1")
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        time.sleep(60)  # Wait 1 minute before retrying
 
-## Lets test the HyperliquidAnalytics class
-analysis = analytics.analyze_trader("0x8cc94dc843e1ea7a19805e0cca43001123512b6a")
+if __name__ == "__main__":
+    main()
 
 
-print(trades)
 
 

@@ -61,7 +61,7 @@ class LLMAgent:
 
     def generate_response(self, 
                          prompt: str, 
-                         model: str = "claude-3-sonnet-20240229",
+                         model: str = "claude-3-haiku-20240307",
                          temperature: float = 0.4,
                          max_tokens: int = 1000) -> Dict[str, Any]:
         """
