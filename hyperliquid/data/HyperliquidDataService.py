@@ -109,7 +109,7 @@ class HyperliquidDataService:
             response = requests.post(self.api_url, headers=self.headers, json=payload)
             response.raise_for_status()
             data = response.json()
-            print(f"Data: {data}")
+            # print(f"Data: {data}")
             self.cache[cache_key] = data
             return data
         except requests.exceptions.RequestException as e:

@@ -25,10 +25,11 @@ def main():
             try:
                 print(f"\nAnalyzing trader {i+1}/{len(top_traders)}: {trader['address']}")
                 analysis = analytics.analyze_trader(trader['address'])
-                print(analysis)
+                # print(analysis)
                 if not analysis['metrics'] :
                     print(f"No metrics for {trader['address']}")
                     continue
+                print(analysis['metrics'])
                 db.store_trader_analysis(trader['address'], analysis)
                 print(f"Stored analysis for {trader['address']}")
                 
@@ -45,7 +46,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

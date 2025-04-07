@@ -129,7 +129,6 @@ class TraderDatabase:
             cursor.execute('''
                 SELECT raw_data FROM traders 
                 WHERE account_value >= ?
-                ORDER BY account_value DESC 
                 LIMIT ?
             ''', (min_account_value, limit))
             return [json.loads(row[0]) for row in cursor.fetchall()]
@@ -182,6 +181,14 @@ class TraderDatabase:
             ))
 
             conn.commit()
+            
+    def get_total_trader_count(self) -> int:
+        """Get total number of traders in the database"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT COUNT(*) FROM traders')
+            return cursor.fetchone()[0]
+        
 
     def get_trader_analysis(self, trader_address: str, limit: int = 1) -> List[Dict[str, Any]]:
         """Get latest analysis for a trader"""
@@ -210,11 +217,12 @@ class TraderDatabase:
             return [{'trader': json.loads(row[0]), 'analysis': json.loads(row[1])} 
                    for row in cursor.fetchall()]
 
-    def get_all_trader_analyses(self, limit: int = None) -> List[Dict[str, Any]]:
-        """Get all trader analyses from the database
+    def get_all_trader_analyses(self, limit: int = None, offset: int = 0) -> List[Dict[str, Any]]:
+        """Get all trader analyses from the database with pagination support
         
         Args:
             limit (int, optional): Maximum number of analyses to return. If None, returns all.
+            offset (int): Number of records to skip. Defaults to 0.
             
         Returns:
             List[Dict[str, Any]]: List of trader analyses with all fields properly parsed
@@ -228,8 +236,8 @@ class TraderDatabase:
                 ORDER BY id
             '''
             if limit is not None:
-                query += ' LIMIT ?'
-                cursor.execute(query, (limit,))
+                query += ' LIMIT ? OFFSET ?'
+                cursor.execute(query, (limit, offset))
             else:
                 cursor.execute(query)
             
@@ -248,4 +256,88 @@ class TraderDatabase:
                 }
                 results.append(analysis)
             
-            return results 
+            return results
+
+    def get_traders_with_analysis(self, page: int = 1, page_size: int = 50) -> Dict[str, Any]:
+        """Get combined data from traders and their latest analysis with pagination
+        
+        Args:
+            page (int): Page number (1-based). Defaults to 1.
+            page_size (int): Number of items per page. Defaults to 50.
+            
+        Returns:
+            Dict[str, Any]: Dictionary containing:
+                - data: List of traders with their latest analysis data
+                - pagination: Dictionary with pagination metadata
+        """
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # First get total count
+            cursor.execute('''
+                SELECT COUNT(DISTINCT t.address)
+                FROM traders t
+                INNER JOIN trader_analysis ta ON t.address = ta.trader_address
+            ''')
+            total_count = cursor.fetchone()[0]
+            
+            # Calculate pagination
+            total_pages = (total_count + page_size - 1) // page_size
+            offset = (page - 1) * page_size
+            
+            # Get paginated data
+            query = '''
+                SELECT 
+                    t.address,
+                    t.display_name,
+                    t.account_value,
+                    t.daily_pnl,
+                    t.daily_roi,
+                    t.daily_volume,
+                    t.weekly_pnl,
+                    t.monthly_pnl,
+                    t.all_time_pnl,
+                    t.raw_data,
+                    ta.raw_analysis,
+                    ta.timestamp as analysis_timestamp
+                FROM traders t
+                INNER JOIN (
+                    SELECT ta.*,
+                           ROW_NUMBER() OVER (PARTITION BY trader_address ORDER BY timestamp DESC) as rn
+                    FROM trader_analysis ta
+                ) ta ON t.address = ta.trader_address AND ta.rn = 1
+                ORDER BY t.account_value DESC
+                LIMIT ? OFFSET ?
+            '''
+            
+            cursor.execute(query, (page_size, offset))
+            results = []
+            
+            for row in cursor.fetchall():
+                trader_data = {
+                    'address': row[0],
+                    'display_name': row[1],
+                    'account_value': row[2],
+                    'daily_pnl': row[3],
+                    'daily_roi': row[4],
+                    'daily_volume': row[5],
+                    'weekly_pnl': row[6],
+                    'monthly_pnl': row[7],
+                    'all_time_pnl': row[8],
+                    'raw_data': json.loads(row[9]) if row[9] else {},
+                    'analysis': json.loads(row[10]) if row[10] else {},
+                    'analysis_timestamp': row[11]
+                }
+                results.append(trader_data)
+            
+            return {
+                'data': results,
+                'pagination': {
+                    'total_items': total_count,
+                    'total_pages': total_pages,
+                    'current_page': page,
+                    'page_size': page_size,
+                    'has_next': page < total_pages,
+                    'has_previous': page > 1
+                }
+            } 

@@ -1,11 +1,16 @@
 from typing import Dict, Any, List
 import pandas as pd
+from db.database import TraderDatabase
 import numpy as np
 from data.HyperliquidAnalytics import HyperliquidAnalytics
 from data.HyperliquidDataService import HyperliquidDataService
 from llm_agent import LLMAgent, LLMProvider
 import json
 from time import sleep
+import os
+import time
+import glob
+
 class AnalysisAgent:
     """AI agent for analyzing trading styles across all traders"""
     
@@ -242,4 +247,175 @@ class AnalysisAgent:
             "psychology": strategy_insights.get("data", {}).get("psychology", {}),
             "recommendations": strategy_insights.get("data", {}).get("recommendations", {}),
             "evolution": strategy_insights.get("data", {}).get("evolution", {})
-        } 
+        }
+    
+    def process_traders_in_batches(self, batch_size: int = 40) -> Dict[str, Any]:
+        """Process traders in batches and aggregate results
+        
+        Args:
+            batch_size (int): Number of traders to process in each batch
+            
+        Returns:
+            Dict[str, Any]: Aggregated analysis results
+        """
+        db = TraderDatabase()
+        total_traders = db.get_total_trader_count()
+        all_insights = []
+        
+        # Process in batches
+        ## TODO:Put limit on total traders for now 
+        total_traders = 500
+        for offset in range(0, total_traders, 30):
+            # Get batch of traders
+            analyses = db.get_all_trader_analyses(limit=30, offset=offset)
+            
+            # Analyze batch
+            batch_results = self.analyze_all_traders(trader_data=analyses)
+            print(f'Batch {offset} results: {batch_results}')
+            all_insights.append(batch_results['insights'])
+            
+            # Store intermediate results
+            self._store_batch_results(offset, batch_results)
+        # batch_files = glob.glob('analysis_cache/batch_*.json')
+        # for batch_file in batch_files:
+        #     with open(batch_file, 'r') as f:
+        #         batch_results = json.load(f)
+        #         all_insights.append(batch_results['insights'])
+        # Aggregate results
+        final_insights = self._aggregate_insights(all_insights)
+        print(f'Final insights: {final_insights}')
+        
+        return {
+            'insights': final_insights,
+            'trader_count': total_traders
+        }
+    
+    def _store_batch_results(self, batch_number: int, results: Dict[str, Any]):
+        """Store batch results in a JSON file
+        
+        Args:
+            batch_number (int): Batch number for file naming
+            results (Dict[str, Any]): Analysis results to store
+        """
+        os.makedirs('analysis_cache', exist_ok=True)
+        file_path = f'analysis_cache/batch_{batch_number}.json'
+        
+        with open(file_path, 'w') as f:
+            json.dump(results, f)
+    
+    def _aggregate_insights(self, all_insights: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Aggregate insights from multiple batches using LLM to provide comprehensive analysis
+        
+        Args:
+            all_insights (List[Dict[str, Any]]): List of insights from each batch
+            
+        Returns:
+            Dict[str, Any]: Aggregated insights with comprehensive market overview
+        """
+        # Process insights in chunks to avoid overwhelming the LLM
+        chunk_size = 5  # Process 5 batches at a time
+        aggregated_chunks = []
+        
+        for i in range(0, len(all_insights), chunk_size):
+            chunk = all_insights[i:i + chunk_size]
+            
+            # Prepare prompt for LLM aggregation
+            aggregation_prompt = f"""
+            You are an expert cryptocurrency market analyst. Analyze and aggregate the following batch of market insights 
+            to provide a comprehensive market overview. Focus on identifying overarching trends, patterns, and significant 
+            changes across the batches.
+
+            BATCH INSIGHTS:
+            {json.dumps(chunk, indent=2)}
+
+            Provide a concise analysis in the following JSON format:
+            {{
+                "market_overview": {{
+                    "current_state": "Brief market state summary",
+                    "most_bought": Summary of most bought assets,
+                    "most_sold": Summary of most sold assets,
+                    "key_observations": ["Top 3 key observations"],
+                    "market_sentiment": "Brief sentiment analysis"
+                }},
+                "trading_styles": {{
+                    "dominant_styles": ["Top 3 dominant styles"],
+                    "style_effectiveness": "Brief effectiveness analysis"
+                }},
+                "risk_analysis": {{
+                    "overall_risk": "Brief risk assessment",
+                    "risk_recommendations": ["Top 3 risk recommendations"]
+                }},
+                "market_behavior": {{
+                    "behavior_patterns": ["Top 3 behavior patterns"],
+                    "market_dynamics": "Brief dynamics analysis"
+                }},
+                "strategies": {{
+                    "successful_strategies": ["Top 3 successful strategies"],
+                    "future_opportunities": ["Top 3 opportunities"]
+                }},
+                "recommendations": {{
+                    "trading_recommendations": ["Top 3 trading recommendations"],
+                    "market_outlook": "Brief market outlook"
+                }}
+            }}
+
+            Keep responses brief and focused. Return ONLY valid JSON, no other text.
+            """
+            
+            # Get LLM response
+            response = self.llm.generate_response(aggregation_prompt)
+            chunk_aggregation = self.llm.parse_json_response(response)
+            aggregated_chunks.append(chunk_aggregation)
+            print(f'Chunk {i} aggregation: {chunk_aggregation}')
+            
+            # Add delay to avoid rate limits
+            time.sleep(5)
+        
+        # If we have multiple chunks, aggregate them into a final overview
+        if len(aggregated_chunks) > 1:
+            final_aggregation_prompt = f"""
+            You are an expert cryptocurrency market analyst. Analyze and aggregate the following batch of market insights 
+            to provide a comprehensive market overview. Focus on identifying overarching trends, patterns, and significant 
+            changes across the batches.
+
+            AGGREGATED INSIGHTS:
+            {json.dumps(aggregated_chunks, indent=2)}
+
+            Provide a concise analysis in the following JSON format:
+            {{
+                "market_overview": {{
+                    "current_state": "Brief market state summary",
+                    "most_bought": Summary of most bought assets,
+                    "most_sold": Summary of most sold assets,
+                    "key_observations": ["Top 3 key observations"],
+                    "market_sentiment": "Brief sentiment analysis"
+                }},
+                "trading_styles": {{
+                    "dominant_styles": ["Top 3 dominant styles"],
+                    "style_effectiveness": "Brief effectiveness analysis"
+                }},
+                "risk_analysis": {{
+                    "overall_risk": "Brief risk assessment",
+                    "risk_recommendations": ["Top 3 risk recommendations"]
+                }},
+                "market_behavior": {{
+                    "behavior_patterns": ["Top 3 behavior patterns"],
+                    "market_dynamics": "Brief dynamics analysis"
+                }},
+                "strategies": {{
+                    "successful_strategies": ["Top 3 successful strategies"],
+                    "future_opportunities": ["Top 3 opportunities"]
+                }},
+                "recommendations": {{
+                    "trading_recommendations": ["Top 3 trading recommendations"],
+                    "market_outlook": "Brief market outlook"
+                }}
+            }}
+
+            Keep responses brief and focused. Return ONLY valid JSON, no other text.
+            """
+            
+            final_response = self.llm.generate_response(final_aggregation_prompt)
+            return self.llm.parse_json_response(final_response)
+        
+        return aggregated_chunks[0] if aggregated_chunks else {} 

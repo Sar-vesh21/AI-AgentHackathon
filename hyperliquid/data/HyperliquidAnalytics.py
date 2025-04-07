@@ -132,6 +132,33 @@ class HyperliquidAnalytics:
         peak_hour = max(metrics['hourly_distribution'].items(), key=lambda x: x[1])[0]
         metrics['peak_activity_hour'] = peak_hour
         
+        # Overall position bias analysis (including all orders)
+        if 'side' in orders_df.columns and 'sz' in orders_df.columns:
+            # Calculate total volume for buys and sells
+            buy_orders = orders_df[orders_df['side'] == 'b']
+            sell_orders = orders_df[orders_df['side'] == 'a']
+            
+            total_buy_volume = buy_orders['sz'].astype(float).sum()
+            total_sell_volume = sell_orders['sz'].astype(float).sum()
+            
+            metrics['total_buy_volume'] = total_buy_volume
+            metrics['total_sell_volume'] = total_sell_volume
+            
+            # Determine overall position bias
+            if total_buy_volume > total_sell_volume * 1.1:  # 10% threshold
+                metrics['position_bias'] = 'Long'
+            elif total_sell_volume > total_buy_volume * 1.1:
+                metrics['position_bias'] = 'Short'
+            else:
+                metrics['position_bias'] = 'Neutral'
+            
+            # Calculate overall long/short ratio
+            total_volume = total_buy_volume + total_sell_volume
+            if total_volume > 0:
+                metrics['long_short_ratio'] = total_buy_volume / total_sell_volume if total_sell_volume > 0 else float('inf')
+                metrics['buy_percentage'] = (total_buy_volume / total_volume) * 100
+                metrics['sell_percentage'] = (total_sell_volume / total_volume) * 100
+        
         # Asset diversity
         if 'coin' in orders_df.columns:
             coin_counts = orders_df['coin'].value_counts()
@@ -166,6 +193,7 @@ class HyperliquidAnalytics:
         
         # Performance metrics
         if all(col in orders_df.columns for col in ['limitPx', 'sz', 'side', 'status', 'coin']):
+            print(f"ENTERED")
             # Sort by timestamp for position tracking
             orders_df = orders_df.sort_values('timestamp')
             
@@ -175,17 +203,22 @@ class HyperliquidAnalytics:
             
             # Process each order
             for _, order in orders_df.iterrows():
+                
                 if order['status'] != 'filled':
                     continue
+                print(f"ORDER: {order}")
                     
                 coin = order['coin']
                 side = order['side']
                 price = float(order['limitPx'])
                 size = float(order['sz'])
                 
+                print(f"COIN: {coin} SIDE: {side} PRICE: {price} SIZE: {size}")
+                
                 if size == 0:
                     continue
                 if coin not in positions:
+                    print(f"OPENING NEW POSITION : {coin} {size} {side}")
                     # Opening a new position
                     positions[coin] = {
                         'entry_price': price,
@@ -194,6 +227,7 @@ class HyperliquidAnalytics:
                     }
                 else:
                     # Closing or reducing an existing position
+                    print(f"REDUCING POSITION")
                     pos = positions[coin]
                     # Check if this is a closing order
                     if (pos['side'] == 'b' and side == 'a') or (pos['side'] == 'a' and side == 'b'):
@@ -208,7 +242,8 @@ class HyperliquidAnalytics:
                             'entry_price': pos['entry_price'],
                             'exit_price': price,
                             'size': min(size, pos['size']),
-                            'pnl': pnl
+                            'pnl': pnl,
+                            'entry_side': pos['side']
                         })
                         
                         # Update or remove position
@@ -224,6 +259,7 @@ class HyperliquidAnalytics:
             
             # Calculate metrics from completed trades
             if trades:
+                print(f"Trades: {trades}")
                 trades_df = pd.DataFrame(trades)
                 metrics['total_trades'] = len(trades)
                 metrics['total_pnl'] = trades_df['pnl'].sum()
