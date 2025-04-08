@@ -111,7 +111,7 @@ class AnalysisAgent:
             }}
         }}
 
-        Focus on identifying current market trends and trader behavior.
+        Focus on identifying current market trends and trader behavior and do not be generic.
         Consider order sizes, frequency, and timing.
         Return ONLY valid JSON, no other text.
         """
@@ -149,7 +149,7 @@ class AnalysisAgent:
             }}
         }}
 
-        Focus on identifying distinct trading styles and their characteristics.
+        Focus on identifying distinct trading styles and their characteristics and do not be generic.
         Return ONLY valid JSON, no other text.
         """
         
@@ -182,7 +182,7 @@ class AnalysisAgent:
             }}
         }}
 
-        Focus on market behavior patterns and risk management strategies.
+        Focus on market behavior patterns and risk management strategies and do not be generic.
         Return ONLY valid JSON, no other text.
         """
         
@@ -226,7 +226,7 @@ class AnalysisAgent:
             }}
         }}
 
-        Focus on successful strategies and psychological aspects of trading.
+        Focus on successful strategies and psychological aspects of trading and do not be generic.
         Return ONLY valid JSON, no other text.
         """
         
@@ -264,7 +264,7 @@ class AnalysisAgent:
         
         # Process in batches
         ## TODO:Put limit on total traders for now 
-        total_traders = 500
+        total_traders = 1000
         for offset in range(0, total_traders, 30):
             # Get batch of traders
             analyses = db.get_all_trader_analyses(limit=30, offset=offset)
@@ -359,7 +359,7 @@ class AnalysisAgent:
                 }}
             }}
 
-            Keep responses brief and focused. Return ONLY valid JSON, no other text.
+            Keep responses brief and focused and do not be generic. Return ONLY valid JSON, no other text.
             """
             
             # Get LLM response
@@ -412,10 +412,73 @@ class AnalysisAgent:
                 }}
             }}
 
-            Keep responses brief and focused. Return ONLY valid JSON, no other text.
+            Keep responses brief and focused and do not be generic. Return ONLY valid JSON, no other text.
             """
             
             final_response = self.llm.generate_response(final_aggregation_prompt)
             return self.llm.parse_json_response(final_response)
         
-        return aggregated_chunks[0] if aggregated_chunks else {} 
+        return aggregated_chunks[0] if aggregated_chunks else {}
+    
+    def analyze_vault_performance(self, vault_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze the performance of vaults to understand market trends and vault health
+        
+        Args:
+            vault_data (List[Dict[str, Any]]): Processed vault data to analyze
+            
+        Returns:
+            Dict[str, Any]: Analysis of vault performance and market trends
+        """
+        # Generate analysis using LLM
+        analysis_prompt = f"""
+        You are an expert cryptocurrency market analyst. Analyze the following vault performance data 
+        and provide insights about market trends and vault health.
+
+        VAULT DATA:
+        {json.dumps(vault_data, indent=2)}
+
+        Analyze this data and provide insights in the following JSON format:
+        {{
+            "market_overview": {{
+                "overall_performance": "Brief summary of overall vault performance",
+                "market_health": "Assessment of current market health based on vault performance",
+                "trend_direction": "Current trend direction (bullish/bearish/neutral)",
+                "market_confidence": "Level of market confidence based on vault performance"
+            }},
+            "performance_analysis": {{
+                "best_performers": ["Top 3 best performing vaults with reasons"],
+                "worst_performers": ["Top 3 worst performing vaults with reasons"],
+                "performance_distribution": "Analysis of performance distribution across vaults",
+                "performance_skew": "Analysis of whether performance is skewed towards certain vaults"
+            }},
+            "trend_analysis": {{
+                "recent_trends": ["Key recent trends in vault performance"],
+                "trend_consistency": "Analysis of how consistent the trends are across vaults",
+                "trend_duration": "Analysis of how long current trends have been in place"
+            }},
+            "risk_assessment": {{
+                "overall_risk": "Assessment of overall risk in vault performance",
+                "risk_factors": ["Key risk factors identified"],
+                "risk_recommendations": ["Recommendations for managing identified risks"]
+            }},
+            "market_implications": {{
+                "market_impact": "Impact of vault performance on broader market",
+                "investor_sentiment": "Analysis of what this means for investor sentiment",
+                "future_outlook": "Brief outlook for future market conditions"
+            }}
+        }}
+
+        Focus on providing specific, data-driven insights and avoid generic statements.
+        Consider the following data points in your analysis:
+        - TVL (Total Value Locked) and its distribution across vaults
+        - APR (Annual Percentage Rate) and its correlation with performance
+        - Performance metrics across different timeframes (daily, weekly, monthly, all-time)
+        - Vault age (created_at) and its relationship to performance
+        - Whether vaults are closed (is_closed) and its implications
+        - Additional details available in the vault details if present
+        
+        Return ONLY valid JSON, no other text.
+        """
+        
+        response = self.llm.generate_response(analysis_prompt)
+        return self.llm.parse_json_response(response) 

@@ -13,7 +13,7 @@ import {
   Filler
 } from 'chart.js';
 import { clsx } from 'clsx';
-import { fetchVaults, type VaultData } from '@/lib/vaultsApi';
+import { fetchVaults, type TransformedVaultData } from '@/lib/vaultsApi';
 
 ChartJS.register(
   CategoryScale,
@@ -56,7 +56,7 @@ const chartOptions = {
   },
 };
 
-const VaultCard = ({ vault }: { vault: VaultData }) => {
+const VaultCard = ({ vault }: { vault: TransformedVaultData }) => {
   const chartData = {
     labels: vault.chart.labels,
     datasets: [
@@ -121,7 +121,7 @@ const Vaults = () => {
 
   const filteredAndSortedVaults = useMemo(() => {
     return vaults
-      .filter((vault: VaultData) => {
+      .filter((vault: TransformedVaultData) => {
         if (!showClosed && !vault.isActive) return false;
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
@@ -130,7 +130,7 @@ const Vaults = () => {
         }
         return true;
       })
-      .sort((a: VaultData, b: VaultData) => {
+      .sort((a: TransformedVaultData, b: TransformedVaultData) => {
         if (sortBy === 'tvl') {
           return b.tvl - a.tvl;
         } else {
@@ -199,7 +199,7 @@ const Vaults = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAndSortedVaults.map((vault: VaultData) => (
+          {filteredAndSortedVaults.map((vault: TransformedVaultData) => (
             <VaultCard key={vault.address} vault={vault} />
           ))}
         </div>

@@ -90,3 +90,16 @@ Note:
 
 Recent conversation:
 {{recentMessages}}`;
+
+
+export const analyseVaultsTemplate = `Some data has been provided to you in a JSON format. This data is the vault data from the top Hyperliquid vaults that has been analysed and summarised.
+
+Analyze the following vault data and provide a nice summary of the data in a presentable format specific to what the user has asked in the conversation.
+
+i.e if the user asks for the best performing vaults, you should analyse the vault data and provide a summary of the best performing vaults.
+
+VAULT DATA:
+{{vault_data}}
+
+Recent conversation:
+{{recentMessages}}`;

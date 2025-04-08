@@ -1,10 +1,13 @@
 import requests
 import json
 from typing import List, Dict
+import os
 
 class SentimentDataService:
-    def __init__(self, api_key='xllx0arz771clp7z4ln4ytxrmm95kkw625i7ivl'):
-        self.api_key = api_key
+    def __init__(self, api_key=None):
+        self.api_key = api_key or os.getenv("SENTIMENT_API_KEY")
+        if not self.api_key:
+            raise ValueError("No Sentiment API key provided in environment or constructor")
         self.base_url = "https://lunarcrush.com/api4/public"
         self.headers = {
             'Authorization': f'Bearer {self.api_key}'

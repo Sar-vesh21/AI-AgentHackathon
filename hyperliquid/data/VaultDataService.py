@@ -10,15 +10,18 @@ class VaultDataService:
         
     def get_vaults(self) -> List[Dict[str, Any]]:
         """
-        Fetch all vaults data from Hyperliquid
+        Fetch all vaults data from Hyperliquid and return top 10 by TVL
         
         Returns:
-            List[Dict]: List of vault data including APR, PnLs and summary
+            List[Dict]: List of top 10 vault data including APR, PnLs and summary, sorted by TVL
         """
         try:
             response = requests.get(f"{self.base_url}/vaults")
             response.raise_for_status()
-            return response.json()
+            vaults = response.json()
+            
+            # Sort by TVL (highest first) and limit to 10 vaults
+            return sorted(vaults, key=lambda x: float(x['summary']['tvl']), reverse=True)[:6]
         except requests.exceptions.RequestException as e:
             raise Exception(f"Failed to fetch vault data: {str(e)}")
 
@@ -103,3 +106,4 @@ class VaultDataService:
             processed_vaults.append(processed_vault)
             
         return processed_vaults 
+    

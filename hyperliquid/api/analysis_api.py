@@ -302,7 +302,7 @@ async def get_sentiment(symbol: str):
 
 @app.get("/analysis/vaults", response_model=Dict[str, Any])
 async def get_vaults(min_tvl: float = 0, min_apr: float = None, active_only: bool = True):
-    """Get all vaults with optional filtering
+    """Get all vaults with optional filtering and cached analysis
     
     Args:
         min_tvl (float): Minimum TVL filter. Defaults to 0.
@@ -310,9 +310,19 @@ async def get_vaults(min_tvl: float = 0, min_apr: float = None, active_only: boo
         active_only (bool): Only show active (non-closed) vaults. Defaults to True.
     """
     try:
-        # Get vault data
-        vaults_data = vault_service.get_vaults()
-        processed_vaults = vault_service.process_vault_metrics(vaults_data)
+        # Read cached analysis data
+        cache_file = 'analysis_cache/vault_analysis.json'
+        if not os.path.exists(cache_file):
+            raise HTTPException(
+                status_code=404,
+                detail="Vault analysis data not available. Please try again later."
+            )
+            
+        with open(cache_file, 'r') as f:
+            cached_data = json.load(f)
+            
+        # Get vault data from cache
+        processed_vaults = cached_data['vault_data']
         
         # Apply filters
         filtered_vaults = [
@@ -325,16 +335,15 @@ async def get_vaults(min_tvl: float = 0, min_apr: float = None, active_only: boo
         # Sort by TVL descending
         filtered_vaults.sort(key=lambda x: x['tvl'], reverse=True)
         
+        
         return {
             "status": "success",
             "data": {
-                "vaults": filtered_vaults,
+                "analysis": cached_data['analysis'],
                 "total_vaults": len(filtered_vaults),
-                "total_tvl": sum(v['tvl'] for v in filtered_vaults),
-                "average_apr": sum(v['apr'] for v in filtered_vaults) / len(filtered_vaults) if filtered_vaults else 0
             },
             "metadata": {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": cached_data['timestamp'],
                 "filters_applied": {
                     "min_tvl": min_tvl,
                     "min_apr": min_apr,

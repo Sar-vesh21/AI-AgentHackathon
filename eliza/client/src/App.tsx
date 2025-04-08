@@ -14,7 +14,7 @@ import Vaults from "./routes/vaults";
 import Positions from "./routes/positions";
 import useVersion from "./hooks/use-version";
 import { useEffect } from "react";
-import AppLayout from './components/app-layout';
+// import AppLayout from './components/app-layout';
 
 const queryClient = new QueryClient({
     defaultOptions: {

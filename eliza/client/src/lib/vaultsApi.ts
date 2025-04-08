@@ -10,12 +10,12 @@ interface VaultSummary {
   createTimeMillis: number;
 }
 
-interface VaultPnlData {
-  timeframe: 'day' | 'week' | 'month' | 'allTime';
-  values: string[];
-}
+// interface VaultPnlData {
+//   timeframe: 'day' | 'week' | 'month' | 'allTime';
+//   values: string[];
+// }
 
-interface VaultData {
+export interface VaultData {
   apr: number;
   pnls: [string, string[]][];
   summary: VaultSummary;
