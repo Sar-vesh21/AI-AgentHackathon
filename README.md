@@ -133,3 +133,7 @@ For issues with:
 ## License
 
 This project is licensed under the terms specified in the LICENSE file.
+
+
+# Team Contribution
+Team is only one person: Sarvesh Rajdev :)
