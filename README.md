@@ -2,7 +2,7 @@
 
 
 
-> 📚 Further Documentation can be found here: [HyperInsight Documentation](https://sarveshs-organization-1.gitbook.io/hyperinsight)
+> 📚 Further Documentation can be found here: [HyperInsight Documentation](https://www.youtube.com/watch?v=bo1Un8C6PqY&ab_channel=SarveshRajdev)
 
 HyperInsight is the ultimate analysis tool for Hyperliquid and the market. Empowering traders to use real-time statistics and track the best derivatives traders on Hyperliquid.
 
