@@ -74,7 +74,8 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
     scales: {
       y: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          // color: 'rgba(255, 255, 255, 0.1)',
+          display: false,
         },
         ticks: {
           color: '#9CA3AF',

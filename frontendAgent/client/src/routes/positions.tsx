@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPositions, type TransformedPosition } from '@/lib/positionsApi';
 import { clsx } from 'clsx';
+import { useState } from 'react';
 
 const formatUSD = (value: number) => {
   return new Intl.NumberFormat('en-US', {
@@ -23,6 +24,15 @@ const formatPercent = (value: number) => {
 
 const Positions = () => {
   const { address } = useParams<{ address: string }>();
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const { data: positionsData, isLoading } = useQuery({
     queryKey: ['positions', address],
@@ -59,6 +69,19 @@ const Positions = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <div className="flex items-center gap-2 p-4 bg-surface-DEFAULT rounded-lg border border-surface-light">
+        <div className="flex-1">
+          <h3 className="text-gray-400 text-sm mb-1">Wallet Address</h3>
+          <p className="font-mono text-sm break-all">{address}</p>
+        </div>
+        <button
+          onClick={copyToClipboard}
+          className="px-3 py-2 text-sm font-medium text-primary-500 hover:text-primary-400 transition-colors"
+        >
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-surface-DEFAULT p-4 rounded-lg border border-surface-light">
           <h3 className="text-gray-400 text-sm">Account Value</h3>

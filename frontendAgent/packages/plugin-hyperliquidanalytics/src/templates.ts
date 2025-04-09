@@ -73,9 +73,9 @@ export const sentimentAnalysisTemplate = `Look at your LAST RESPONSE in the conv
 Based on ONLY that last message, extract the token symbol.
 
 For example:
-- "I'll check PIP price for you" -> { "symbol": "PIP" }
-- "Let me check the price of HYPE" -> { "symbol": "HYPE" }
-- "I'll get the current ETH price" -> { "symbol": "ETH" }
+- "I'll check the sentiment for HYPE" -> { "symbol": "HYPE" }
+- "Let me check the sentiment of ETH" -> { "symbol": "ETH" }
+- "I'll get the sentiment of HYPE" -> { "symbol": "HYPE" }
 
 \`\`\`json
 {
