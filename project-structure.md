@@ -4,7 +4,7 @@
 trading-analytics-platform/
 ├── hyperliquid/                    # Hyperliquid trading analytics
 │   ├── background_jobs/           # Background processing jobs
-│   │   └── main_job.py           # Main background job
+│   │   └── main_job.py            # Main data collection background job
 │   ├── data/                      # Data processing modules
 │   ├── api/                       # API endpoints
 │   ├── db/                        # Database related code
@@ -18,7 +18,7 @@ trading-analytics-platform/
 │   ├── hyperliquid.db            # SQLite database
 │   └── *.json                     # Various data files
 │
-├── eliza/                         # Eliza AI agent system
+├── frontEndAgent/                 # AI agent system
 │   ├── packages/                  # Core packages
 │   ├── client/                    # Client application
 │   ├── agent/                     # Agent implementation
