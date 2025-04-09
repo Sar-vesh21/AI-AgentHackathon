@@ -256,4 +256,17 @@ class HyperliquidDataService:
             # Sort back to descending order (newest first)
             df = df.sort_values('timestamp', ascending=False)
             
-        return df 
+        return df
+
+    def get_user_positions(self, user_address: str) -> Dict[str, Any]:
+        """Fetch current positions for a user"""
+        cache_key = f"positions_{user_address}"
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+
+        payload = {
+            "type": "clearinghouseState",
+            "user": user_address
+        }
+        
+        return self._make_api_request(payload, cache_key) 

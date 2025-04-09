@@ -103,3 +103,35 @@ VAULT DATA:
 
 Recent conversation:
 {{recentMessages}}`;
+
+
+export const getAddressTemplate = `Look at your LAST RESPONSE in the conversation where you confirmed which trader to analyse.
+Based on ONLY that last message, extract the trader's address.
+
+For example:
+- "I'll analyse the trader with address 0x1234567890123456789012345678901234567890" -> { "address": "0x1234567890123456789012345678901234567890" }
+- "Let me analyse the trader with address 0x1234567890123456789012345678901234563456" -> { "address": "0x1234567890123456789012345678901234563456" }
+
+\`\`\`json
+{
+    "address": "<trader's address from your last message>"
+}
+\`\`\`
+
+Recent conversation:
+{{recentMessages}}`;
+
+export const getPositionsTemplate = `Some data has been provided to you in a JSON format. These are trader's current positions from the Hyperliquid database (in the positions key), and also the analysis of the trader's positions against the market data (in the analysis key).
+
+Analyze the following trader data and provide a nice summary of the data in a presentable format specific to what the user has asked in the conversation.
+
+For example:
+- If the user asks for the trader's positions, you should analyse the trader's positions and provide a summary of the positions in a presentable format.
+- If the user asks if the trader is holding a specific token, you should analyse the trader's position and extract the positions of the specific token, if any
+
+TRADER DATA:
+{{trader_data}}
+
+Recent conversation:
+{{recentMessages}}`;
+

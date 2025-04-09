@@ -5,6 +5,7 @@ from db.database import TraderDatabase
 from datetime import datetime, timedelta
 from data.SentimentDataService import SentimentDataService
 from data.VaultDataService import VaultDataService
+from data.HyperliquidDataService import HyperliquidDataService
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
@@ -23,6 +24,8 @@ app.add_middleware(
 # Initialize services
 sentiment_service = SentimentDataService()
 vault_service = VaultDataService()
+hyperliquid_service = HyperliquidDataService()
+analysis_agent = AnalysisAgent()
 
 @app.get("/analysis/recent", response_model=Dict[str, Any])
 async def get_recent_analysis():
@@ -405,7 +408,36 @@ async def get_vault_details(address: str, include_positions: bool = True):
         raise HTTPException(status_code=500, detail=str(e))
     
     
+@app.get("/analysis/positions/{address}", response_model=Dict[str, Any])
+async def get_user_positions(address: str):
+    """Get current positions and analysis for a specific user
     
+    Args:
+        address (str): User's wallet address
+        
+    Returns:
+        Dict[str, Any]: User's current positions and analysis
+    """
+    try:
+        # Get user positions
+        positions = hyperliquid_service.get_user_positions(address)
+        
+        # Analyze positions against market data
+        analysis = analysis_agent.analyze_user_positions(positions)
+        
+        return {
+            "status": "success",
+            "data": {
+                "positions": positions,
+                "analysis": analysis
+            },
+            "metadata": {
+                "address": address,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

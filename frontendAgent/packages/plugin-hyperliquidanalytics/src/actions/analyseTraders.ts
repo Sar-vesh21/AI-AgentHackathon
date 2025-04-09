@@ -15,9 +15,9 @@ import { analyseTradersTemplate } from "../templates.js";
 import axios from 'axios';
 
 export const analyseTraders: Action = {
-    name: "ANALYSE_TRADERS",
-    similes: ["ANALYSE_TRADER", "ANALYSE_TRADER_PERFORMANCE", "GET_TRADER_ANALYSIS"],
-    description: "Analyse traders on Hyperliquid",
+    name: "ANALYSE_MARKET",
+    similes: ["ANALYSE_MARKET", "ANALYSE_GENERAL_MARKET", "GET_MARKET_ANALYSIS"],
+    description: "Analyse market on Hyperliquid",
     validate: async () => true,
     handler: async (
         runtime: IAgentRuntime,
@@ -108,7 +108,7 @@ export const analyseTraders: Action = {
                 user: "{{agent}}",
                 content: {
                     text: "I'll analyze the recent traders and provide insights about their trading patterns.",
-                    action: "ANALYSE_TRADERS",
+                    action: "ANALYSE_MARKET",
                 },
             },
         ],
@@ -129,7 +129,7 @@ export const analyseTraders: Action = {
                 user: "{{agent}}",
                 content: {
                     text: "I'll analyze the trading styles of recent traders.",
-                    action: "ANALYSE_TRADERS",
+                    action: "ANALYSE_MARKET",
                 },
             },
         ],

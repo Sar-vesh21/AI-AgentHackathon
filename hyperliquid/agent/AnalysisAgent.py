@@ -481,4 +481,68 @@ class AnalysisAgent:
         """
         
         response = self.llm.generate_response(analysis_prompt)
-        return self.llm.parse_json_response(response) 
+        return self.llm.parse_json_response(response)
+
+    def analyze_user_positions(self, user_positions: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze a user's positions against general market data
+        
+        Args:
+            user_positions (Dict[str, Any]): User's current positions from Hyperliquid
+            
+        Returns:
+            Dict[str, Any]: Analysis of user's positions compared to market
+        """
+        try:
+            # Load market data from final_analysis.json
+            with open('analysis_cache/final_analysis.json', 'r') as f:
+                market_data = json.load(f)
+            
+            # Prepare prompt for LLM
+            analysis_prompt = f"""
+            You are an expert cryptocurrency trading analyst. Analyze the following user's positions 
+            and compare them against the general market data to provide insights about their trading style 
+            and asset allocation.
+
+            USER POSITIONS:
+            {json.dumps(user_positions, indent=2)}
+
+            MARKET DATA:
+            {json.dumps(market_data['results']['insights']['data'], indent=2)}
+
+            Analyze this data and provide insights in the following JSON format:
+            {{
+                "asset_allocation": {{
+                    "allocation_comparison": "Comparison of user's asset allocation with market trends",
+                    "diversification_score": "Score (1-10) of how well diversified the portfolio is",
+                    "concentration_risks": ["Identified concentration risks"],
+                    "allocation_recommendations": ["Recommendations for asset allocation"]
+                }},
+                "market_alignment": {{
+                    "alignment_score": "Score (1-10) of how well aligned with market trends",
+                    "alignment_analysis": "Detailed analysis of market alignment",
+                    "opportunities": ["Identified opportunities based on market trends"],
+                    "threats": ["Identified threats based on market trends"]
+                }},
+                "risk_assessment": {{
+                    "overall_risk": "Assessment of overall portfolio risk",
+                    "risk_factors": ["Key risk factors identified"],
+                    "risk_mitigation": ["Recommendations for risk mitigation"]
+                }},
+            }}
+
+            Focus on providing specific, data-driven insights and avoid generic statements.
+            Consider the following in your analysis:
+            - Compare user's positions with market trends from market_overview
+            - Analyze trading style against identified successful strategies
+            - Evaluate risk profile against market risk analysis
+            - Consider market sentiment and behavior patterns
+            
+            Return ONLY valid JSON, no other text.
+            """
+            
+            response = self.llm.generate_response(analysis_prompt)
+            return self.llm.parse_json_response(response)
+            
+        except Exception as e:
+            print(f"Error analyzing user positions: {str(e)}")
+            return {} 
