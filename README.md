@@ -4,7 +4,9 @@
 
 > 📚 Further Documentation can be found here: [HyperInsight Documentation](https://sarveshs-organization-1.gitbook.io/hyperinsight)
 
-A comprehensive trading analytics system with a frontend agent interface.
+HyperInsight is the ultimate analysis tool for Hyperliquid and the market. Empowering traders to use real-time statistics and track the best derivatives traders on Hyperliquid.
+
+What's more? Our innovative AI agent swarm handles the workload, saving you the need to look through GBs of data and providing insights right on the spot.
 
 ## Prerequisites
 
