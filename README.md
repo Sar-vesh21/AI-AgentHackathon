@@ -1,4 +1,4 @@
-# Hyperliquid Trading Analytics System
+# HyperInsight: A Hyperliquid Trading Analytics System
 
 
 
