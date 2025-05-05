@@ -23,7 +23,7 @@ import { defaultCharacter } from "./defaultCharacter.ts";
 
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { hyperliquidPlugin } from "@elizaos/plugin-hyperliquid";
-import { hyperliquidAnalyticsPlugin } from "@elizaos/plugin-hyperliquidAnalytics";
+import { hyperliquidAnalyticsPlugin } from "@elizaos/plugin-hyperliquidanalytics";
 import JSON5 from 'json5';
 
 import fs from "fs";

@@ -14,3 +14,7 @@ myenv/
 venv/
 
 *.db
+
+__pycache__/
+
+batch*

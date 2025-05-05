@@ -193,7 +193,7 @@ class HyperliquidAnalytics:
         
         # Performance metrics
         if all(col in orders_df.columns for col in ['limitPx', 'sz', 'side', 'status', 'coin']):
-            print(f"ENTERED")
+            # print(f"ENTERED")
             # Sort by timestamp for position tracking
             orders_df = orders_df.sort_values('timestamp')
             
@@ -206,19 +206,19 @@ class HyperliquidAnalytics:
                 
                 if order['status'] != 'filled':
                     continue
-                print(f"ORDER: {order}")
+                # print(f"ORDER: {order}")
                     
                 coin = order['coin']
                 side = order['side']
                 price = float(order['limitPx'])
                 size = float(order['sz'])
                 
-                print(f"COIN: {coin} SIDE: {side} PRICE: {price} SIZE: {size}")
+                # print(f"COIN: {coin} SIDE: {side} PRICE: {price} SIZE: {size}")
                 
                 if size == 0:
                     continue
                 if coin not in positions:
-                    print(f"OPENING NEW POSITION : {coin} {size} {side}")
+                    # print(f"OPENING NEW POSITION : {coin} {size} {side}")
                     # Opening a new position
                     positions[coin] = {
                         'entry_price': price,
@@ -227,7 +227,7 @@ class HyperliquidAnalytics:
                     }
                 else:
                     # Closing or reducing an existing position
-                    print(f"REDUCING POSITION")
+                    # print(f"REDUCING POSITION")
                     pos = positions[coin]
                     # Check if this is a closing order
                     if (pos['side'] == 'b' and side == 'a') or (pos['side'] == 'a' and side == 'b'):
@@ -259,7 +259,7 @@ class HyperliquidAnalytics:
             
             # Calculate metrics from completed trades
             if trades:
-                print(f"Trades: {trades}")
+                # print(f"Trades: {trades}")
                 trades_df = pd.DataFrame(trades)
                 metrics['total_trades'] = len(trades)
                 metrics['total_pnl'] = trades_df['pnl'].sum()

@@ -2,6 +2,7 @@ from llm_agent import LLMAgent
 from data.HyperliquidAnalytics import HyperliquidAnalytics
 from data.HyperliquidDataService import HyperliquidDataService
 from db.database import TraderDatabase
+from background_jobs.analysis_job import run_analysis_job
 import time
 from datetime import datetime, timedelta
 
@@ -34,6 +35,12 @@ def run_main_job():
                 print(analysis['metrics'])
                 db.store_trader_analysis(trader['address'], analysis)
                 print(f"Stored analysis for {trader['address']}")
+                
+                # Run analysis job after every 1000 traders
+                # if (i + 1) % 1000 == 0:
+                #     print(f"\nReached {i+1} traders, running analysis job...")
+                #     run_analysis_job()
+                #     print("Analysis job completed, continuing with main job...")
                 
             except Exception as e:
                 print(f"Error analyzing trader {trader['address']}: {e}")

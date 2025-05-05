@@ -265,9 +265,9 @@ class AnalysisAgent:
         # Process in batches
         ## TODO:Put limit on total traders for now 
         total_traders = 1000
-        for offset in range(0, total_traders, 30):
+        for offset in range(0, total_traders, 35):
             # Get batch of traders
-            analyses = db.get_all_trader_analyses(limit=30, offset=offset)
+            analyses = db.get_all_trader_analyses(limit=35, offset=offset)
             
             # Analyze batch
             batch_results = self.analyze_all_traders(trader_data=analyses)
@@ -276,6 +276,7 @@ class AnalysisAgent:
             
             # Store intermediate results
             self._store_batch_results(offset, batch_results)
+            sleep(10)
         # batch_files = glob.glob('analysis_cache/batch_*.json')
         # for batch_file in batch_files:
         #     with open(batch_file, 'r') as f:

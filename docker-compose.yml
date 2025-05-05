@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  hyperliquid-backend:
+    build:
+      context: ./hyperliquid
+      dockerfile: Dockerfile
+    volumes:
+      - ./hyperliquid:/app
+      - hyperliquid-data:/app/data
+    environment:
+      - ENVIRONMENT=production
+    env_file:
+      - ./hyperliquid/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend-agent:
+    build:
+      context: ./frontEndAgent
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontEndAgent:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./frontEndAgent/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - hyperliquid-backend
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - hyperliquid-backend
+      - frontend-agent
+    restart: unless-stopped
+
+volumes:
+  hyperliquid-data: 

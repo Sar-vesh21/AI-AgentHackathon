@@ -1,57 +1,57 @@
 {
   "tweet": {
-    "positive": 43.48,
-    "neutral": 44.13,
-    "negative": 12.39,
-    "total_interactions": 41810808,
+    "positive": 50.26,
+    "neutral": 39.26,
+    "negative": 10.48,
+    "total_interactions": 41806037,
     "raw_counts": {
-      "positive": 18180271,
-      "neutral": 18449022,
-      "negative": 5181515
-    }
-  },
-  "tiktok-video": {
-    "positive": 30.11,
-    "neutral": 56.46,
-    "negative": 13.43,
-    "total_interactions": 8280386,
-    "raw_counts": {
-      "positive": 2493290,
-      "neutral": 4674731,
-      "negative": 1112365
-    }
-  },
-  "youtube-video": {
-    "positive": 44.98,
-    "neutral": 44.96,
-    "negative": 10.05,
-    "total_interactions": 10060158,
-    "raw_counts": {
-      "positive": 4525444,
-      "neutral": 4523441,
-      "negative": 1011273
-    }
-  },
-  "news": {
-    "positive": 48.84,
-    "neutral": 41.18,
-    "negative": 9.98,
-    "total_interactions": 242468,
-    "raw_counts": {
-      "positive": 118422,
-      "neutral": 99850,
-      "negative": 24196
+      "positive": 21011339,
+      "neutral": 16413046,
+      "negative": 4381652
     }
   },
   "reddit-post": {
-    "positive": 35.64,
-    "neutral": 43.62,
-    "negative": 20.74,
-    "total_interactions": 105563,
+    "positive": 32.57,
+    "neutral": 58.18,
+    "negative": 9.26,
+    "total_interactions": 147652,
     "raw_counts": {
-      "positive": 37627,
-      "neutral": 46047,
-      "negative": 21889
+      "positive": 48087,
+      "neutral": 85898,
+      "negative": 13667
+    }
+  },
+  "youtube-video": {
+    "positive": 40.92,
+    "neutral": 49.61,
+    "negative": 9.47,
+    "total_interactions": 9837285,
+    "raw_counts": {
+      "positive": 4025405,
+      "neutral": 4880374,
+      "negative": 931506
+    }
+  },
+  "tiktok-video": {
+    "positive": 18.57,
+    "neutral": 61.52,
+    "negative": 19.92,
+    "total_interactions": 7878879,
+    "raw_counts": {
+      "positive": 1462751,
+      "neutral": 4846870,
+      "negative": 1569258
+    }
+  },
+  "news": {
+    "positive": 68.9,
+    "neutral": 24.07,
+    "negative": 7.02,
+    "total_interactions": 109585,
+    "raw_counts": {
+      "positive": 75509,
+      "neutral": 26379,
+      "negative": 7697
     }
   }
 }

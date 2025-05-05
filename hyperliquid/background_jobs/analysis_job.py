@@ -13,7 +13,7 @@ def run_analysis_job():
     
     try:
         # Process traders in batches
-        results = agent.process_traders_in_batches(batch_size=40)
+        results = agent.process_traders_in_batches(batch_size=30)
         
         # Store final results
         os.makedirs('analysis_cache', exist_ok=True)

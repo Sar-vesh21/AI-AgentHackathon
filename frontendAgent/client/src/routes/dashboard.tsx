@@ -186,7 +186,7 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
                 </div>
                 <div className="text-right">
                   <div className="font-medium">{token.price}</div>
-                  <div className={token.change.startsWith('+') ? 'text-primary-500' : 'text-red-500'}>
+                  <div className={token.change.startsWith('+') ? 'text-emerald-400' : 'text-red-500'}>
                     {token.change}
                   </div>
                 </div>
