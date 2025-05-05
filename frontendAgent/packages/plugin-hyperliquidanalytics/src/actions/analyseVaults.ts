@@ -33,7 +33,7 @@ export const analyseVaults: Action = {
                 : await runtime.updateRecentMessageState(state);
 
             // Make the API request to our analysis API
-            const response = await axios.get('http://localhost:8000/analysis/vaults');
+            const response = await axios.get('/analysis/vaults');
 
             if (response.data.status !== 'success') {
                 throw new Error('Failed to get vault analysis');

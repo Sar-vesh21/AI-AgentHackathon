@@ -33,7 +33,7 @@ export const analyseTraders: Action = {
                 : await runtime.updateRecentMessageState(state);
 
             // Make the API request to our analysis API
-            const response = await axios.get('http://localhost:8000/analysis/recent', {
+            const response = await axios.get('/analysis/recent', {
                 params: {
                     limit: 50  // Default limit, can be adjusted based on conversation
                 }

@@ -55,7 +55,7 @@ export const analyseSentiment: Action = {
             }
 
             // Make the API request to our analysis API
-            const response = await axios.get(`http://localhost:8000/analysis/sentiment/${content.symbol}`);
+            const response = await axios.get(`/analysis/sentiment/${content.symbol}`);
 
             elizaLogger.info(`[INFO] [ANALYSE_SENTIMENT] ${JSON.stringify(response.data, null, 2)}`);
 

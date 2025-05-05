@@ -2,7 +2,7 @@ import type { UUID, Character } from "@elizaos/core";
 
 const BASE_URL =
     import.meta.env.VITE_SERVER_BASE_URL ||
-    `${import.meta.env.VITE_SERVER_URL}:${import.meta.env.VITE_SERVER_PORT}`;
+    '/'; // Default to root for production
 
 console.log({ BASE_URL });
 
@@ -43,7 +43,7 @@ const fetcher = async ({
         }
     }
 
-    return fetch(`${BASE_URL}${url}`, options).then(async (resp) => {
+    return fetch(`${BASE_URL.replace(/\/$/, "")}/${url.replace(/^\//, "")}`, options).then(async (resp) => {
         const contentType = resp.headers.get("Content-Type");
         if (contentType === "audio/mpeg") {
             return await resp.blob();

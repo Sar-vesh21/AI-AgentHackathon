@@ -135,7 +135,7 @@
 // }
 
 // Base URL for API endpoints
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "";
 const HYPERLIQUID_BASE_URL = "https://api.hyperliquid.xyz/info";
 
 const COINGECKO_API_KEY = 'CG-DssZCqvgtcftTwkEgsyqackM';

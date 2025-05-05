@@ -55,7 +55,7 @@ export const analyseTrader: Action = {
             }
 
             // Make the API request to our analysis API
-            const response = await axios.get(`http://localhost:8000/analysis/positions/${content.address}`);
+            const response = await axios.get(`/analysis/positions/${content.address}`);
 
             elizaLogger.info(`[INFO] [ANALYSE_TRADER] ${JSON.stringify(response.data, null, 2)}`);
 
