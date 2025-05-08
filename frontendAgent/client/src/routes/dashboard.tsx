@@ -13,8 +13,9 @@ import {
 import { forwardRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { fetchTokens, fetchChartData, fetchHypeSentiment, fetchTraderSummarys } from '@/lib/statsApi';
+import { fetchTokens, fetchMetaAndAssetContexts, fetchChartData, fetchHypeSentiment, fetchTraderSummarys, fetchVolume, fetchOpenInterest } from '@/lib/statsApi';
 import { clsx } from 'clsx';
+import { formatLargeNumber } from '@/lib/utils';
 
 ChartJS.register(
   CategoryScale,
@@ -32,10 +33,16 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 50;
 
-  const { data: tokens } = useQuery({
+  const { data: tokensData, isLoading: tokensLoading } = useQuery({
     queryKey: ['tokens'],
     queryFn: fetchTokens,
     refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  const { data: metaData, isLoading: metaLoading } = useQuery({
+    queryKey: ['metaAndAssets'],
+    queryFn: fetchMetaAndAssetContexts,
+    refetchInterval: 30000,
   });
 
   const { data: chartData, isLoading: chartLoading } = useQuery({
@@ -54,6 +61,23 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
     queryFn: () => fetchTraderSummarys(currentPage, pageSize),
     refetchInterval: 1000 // Refresh every 30 seconds
   });
+
+  const totalVolume = metaData?.assetContexts?.reduce((total, asset, index) => {
+    const volume = BigInt(Math.floor(parseFloat(asset.dayNtlVlm) * 1e6)) / BigInt(1e6);
+    return total + volume;
+  }, BigInt(0)) || BigInt(0);
+
+  const totalOpenInterest = metaData?.assetContexts?.reduce((total, asset, index) => {
+    const oi = BigInt(Math.floor(parseFloat(asset.openInterest) * 1e6)) / BigInt(1e6);
+    return total + oi;
+  }, BigInt(0)) || BigInt(0);
+
+  console.log('Total Volume:', totalVolume.toString());
+  console.log('Total Open Interest:', totalOpenInterest.toString());
+
+  // Convert BigInt to number for display
+  const displayVolume = Number(totalVolume);
+  const displayOpenInterest = Number(totalOpenInterest);
 
   // Add console logs to inspect data
   console.log('Sentiment Data:', sentimentData);
@@ -92,13 +116,19 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
     },
   };
 
+  if (tokensLoading || metaLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div ref={ref} className="p-6 space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-surface-DEFAULT p-4 rounded-lg border border-surface-light">
           <h3 className="text-gray-400 text-sm">Total Volume</h3>
-          <p className="text-2xl font-bold">$45.2M</p>
-          <span className="text-primary-500 text-sm">+20.1% from last month</span>
+          <p className="text-2xl font-bold">
+            {formatLargeNumber(displayVolume)}
+          </p>
+          <span className="text-primary-500 text-sm">Real-time data</span>
         </div>
         <div className="bg-surface-DEFAULT p-4 rounded-lg border border-surface-light">
           <h3 className="text-gray-400 text-sm">HYPE Sentiment</h3>
@@ -120,8 +150,10 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
         <div className="bg-surface-DEFAULT p-4 rounded-lg border border-surface-light">
           <h3 className="text-gray-400 text-sm">Open Interest</h3>
-          <p className="text-2xl font-bold">$12.8M</p>
-          <span className="text-primary-500 text-sm">+12% from last week</span>
+          <p className="text-2xl font-bold">
+            {formatLargeNumber(displayOpenInterest)}
+          </p>
+          <span className="text-primary-500 text-sm">Real-time data</span>
         </div>
         <div className="bg-surface-DEFAULT p-4 rounded-lg border border-surface-light">
           <h3 className="text-gray-400 text-sm">Liquidations (24h)</h3>
@@ -173,7 +205,7 @@ const Dashboard = forwardRef<HTMLDivElement>((_, ref) => {
         <div className="bg-surface-DEFAULT p-6 rounded-lg border border-surface-light">
           <h2 className="text-xl font-bold mb-6">Top Tokens</h2>
           <div className="space-y-4">
-            {tokens?.map((token: any) => (
+            {tokensData?.map((token: any) => (
               <div key={token.symbol} className="flex items-center justify-between p-3 hover:bg-surface-light rounded-lg transition-colors">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-full bg-surface-light flex items-center justify-center text-sm font-bold">

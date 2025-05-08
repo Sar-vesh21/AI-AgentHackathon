@@ -275,6 +275,69 @@ export const fetchHypeSentiment = async (): Promise<any> => {
     return fetcher<any>('/analysis/sentiment/hyperliquid');
 };
 
+// Meta and Asset Context functions
+interface AssetContext {
+    funding: string;
+    openInterest: string;
+    prevDayPx: string;
+    dayNtlVlm: string;
+    premium: string | null;
+    oraclePx: string;
+    markPx: string;
+    midPx: string | null;
+    impactPxs: string[] | null;
+    dayBaseVlm: string;
+}
+
+interface AssetInfo {
+    szDecimals: number;
+    name: string;
+    maxLeverage: number;
+    marginTableId: number;
+    isDelisted?: boolean;
+    onlyIsolated?: boolean;
+}
+
+interface MarginTier {
+    lowerBound: string;
+    maxLeverage: number;
+}
+
+interface MarginTable {
+    description: string;
+    marginTiers: MarginTier[];
+}
+
+interface MetaAndAssetContextsResponse {
+    universe: AssetInfo[];
+    marginTables: [number, MarginTable][];
+    assetContexts: AssetContext[];
+}
+
+export const fetchMetaAndAssetContexts = async (): Promise<MetaAndAssetContextsResponse> => {
+    const url = 'https://api.hyperliquid.xyz/info';
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: "metaAndAssetCtxs"
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch meta and asset contexts');
+    }
+
+    const data = await response.json();
+    return {
+        universe: data[0].universe,
+        marginTables: data[0].marginTables,
+        assetContexts: data[1]
+    };
+};
+
 // Helper functions
 const getTokenName = (symbol: string): string => {
     const names: { [key: string]: string } = {
@@ -298,18 +361,3 @@ const formatChange = (change: number): string => {
     const sign = change >= 0 ? '+' : '';
     return `${sign}${change.toFixed(1)}%`;
 };
-
-// const formatUSD = (value: number): string => {
-//     const absValue = Math.abs(value);
-//     if (absValue >= 1_000_000) {
-//         return `$${(value / 1_000_000).toFixed(2)}M`;
-//     } else if (absValue >= 1_000) {
-//         return `$${(value / 1_000).toFixed(2)}K`;
-//     }
-//     return `$${value.toFixed(2)}`;
-// };
-
-// const formatPercentage = (value: number): string => {
-//     const sign = value >= 0 ? '+' : '';
-//     return `${sign}${value.toFixed(1)}%`;
-// };
