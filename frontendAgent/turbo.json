@@ -21,6 +21,9 @@
         "eliza-docs#build": {
             "outputs": ["build/**"]
         },
+        "auth#build": {
+            "outputs": ["dist/**"]
+        },
         "dev": {
             "persistent": true,
             "cache": true

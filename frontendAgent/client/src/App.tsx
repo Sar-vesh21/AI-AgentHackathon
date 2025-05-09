@@ -14,6 +14,10 @@ import Vaults from "./routes/vaults";
 import Positions from "./routes/positions";
 import useVersion from "./hooks/use-version";
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "./providers/authContext";
+import Login from "./routes/login";
+import { AuthProvider } from './providers/authContext';
 // import AppLayout from './components/app-layout';
 
 const queryClient = new QueryClient({
@@ -24,51 +28,145 @@ const queryClient = new QueryClient({
     },
 });
 
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const { user, loading, isTokenExpired } = useAuth();
+
+    if (loading) {
+        // TODO: Show a loading spinner or nothing
+        return <div>Loading...</div>;
+    }
+
+    // If not logged in or token is expired, redirect
+    if (!user || isTokenExpired()) {
+        return <Navigate to="/login" />;
+    }
+
+    return children;
+};
+
+const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+                <div className="flex flex-1 flex-col gap-4 size-full container">
+                    {children}
+                </div>
+            </SidebarInset>
+        </SidebarProvider>
+    );
+};
+
 function App() {
     useVersion();
 
     useEffect(() => {
         // Apply dark mode to html element
-        document.documentElement.classList.add('dark');
+        document.documentElement.classList.add("dark");
     }, []);
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <div
-                style={{
-                    colorScheme: "dark",
-                }}
-            >
-                <BrowserRouter>
-                    <TooltipProvider delayDuration={0}>
-                        <SidebarProvider>
-                            <AppSidebar />
-                            <SidebarInset>
-                                <div className="flex flex-1 flex-col gap-4 size-full container">
-                                    <Routes>
-                                        <Route path="/" element={<Dashboard />} />
-                                        <Route path="/token-explorer" element={<TokenExplorer />} />
-                                        <Route path="/vaults" element={<Vaults />} />
-                                        <Route path="/positions" element={<Positions />} />
-                                        <Route path="/positions/:address" element={<Positions />} />
-                                        <Route path='/home' element={<Home />} />
-                                        <Route
-                                            path="chat/:agentId"
-                                            element={<Chat />}
-                                        />
-                                        <Route
-                                            path="settings/:agentId"
-                                            element={<Overview />}
-                                        />
-                                    </Routes>
-                                </div>
-                            </SidebarInset>
-                        </SidebarProvider>
-                        <Toaster />
-                    </TooltipProvider>
-                </BrowserRouter>
-            </div>
-        </QueryClientProvider>
+        <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+                <div
+                    style={{
+                        colorScheme: "dark",
+                    }}
+                >
+                    <BrowserRouter>
+                        <TooltipProvider delayDuration={0}>
+                            <Routes>
+                                {/* Unauthenticated routes */}
+                                <Route path="/login" element={<Login />} />
+                                
+                                {/* Authenticated routes */}
+                                <Route
+                                    path="/"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Dashboard />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/token-explorer"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <TokenExplorer />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/vaults"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Vaults />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/positions"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Positions />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/positions/:address"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Positions />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/home"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Home />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="chat/:agentId"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Chat />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="settings/:agentId"
+                                    element={
+                                        <ProtectedRoute>
+                                            <AuthenticatedLayout>
+                                                <Overview />
+                                            </AuthenticatedLayout>
+                                        </ProtectedRoute>
+                                    }
+                                />
+                            </Routes>
+                            <Toaster />
+                        </TooltipProvider>
+                    </BrowserRouter>
+                </div>
+            </QueryClientProvider>
+        </AuthProvider>
     );
 }
 

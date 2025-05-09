@@ -3,3 +3,4 @@ packages:
     - "packages/*"
     - "client"
     - "agent"
+    - "auth"

@@ -732,6 +732,8 @@ async function findDatabaseAdapter(runtime: AgentRuntime) {
   return adapterInterface;
 }
 
+
+// NOTE: Should an agent be able to start after communication with new client?
 async function startAgent(
     character: Character,
     directClient: DirectClient
